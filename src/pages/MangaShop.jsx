@@ -9,34 +9,36 @@ function MangaShop() {
     categories: [],
     sortBy: 'popular'
   });
-
+  const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9; // Number of products per page
+  const [loading, setLoading] = useState(false);
+  const itemsPerPage = 9;
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({
       ...prev,
       [filterType]: value
     }));
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
-
-  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
         const response = await axios.get('http://localhost:5000/api/products');
         setProducts(response.data);
       } catch (error) {
-        console.error('Erro ao buscar os produtos:', error);
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProducts();
   }, []);
 
   const filteredProducts = products
-    .filter(product => product.category == 'Manga')
+    .filter(product => product.category === 'Manga')
     .filter(product => {
       if (filters.priceRange) {
         const [min, max] = filters.priceRange.split('-').map(Number);
@@ -53,9 +55,22 @@ function MangaShop() {
         return filters.categories.includes(product.category);
       }
       return true;
+    })
+    .sort((a, b) => {
+      switch (filters.sortBy) {
+        case 'popular':
+          return (b.total_sold || 0) - (a.total_sold || 0);
+        case 'newest':
+          return new Date(b.created_at) - new Date(a.created_at);
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        default:
+          return 0;
+      }
     });
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const indexOfLastProduct = currentPage * itemsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
@@ -63,7 +78,7 @@ function MangaShop() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    window.scrollTo(0, 0); // Scroll to top when page changes
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -74,53 +89,60 @@ function MangaShop() {
           <FilterSidebar filters={filters} onFilterChange={handleFilterChange} />
         </div>
         <div className="flex-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-
-          {/* Pagination controls */}
-          {totalPages > 1 && (
-            <div className="flex justify-center space-x-2 mt-8 mb-4">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded ${
-                  currentPage === 1 
-                    ? 'bg-gray-300 cursor-not-allowed' 
-                    : 'bg-primary text-white hover:bg-opacity-90'
-                }`}
-              >
-                Previous
-              </button>
-              
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index + 1}
-                  onClick={() => handlePageChange(index + 1)}
-                  className={`px-4 py-2 rounded ${
-                    currentPage === index + 1
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 hover:bg-gray-300'
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
-              
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded ${
-                  currentPage === totalPages 
-                    ? 'bg-gray-300 cursor-not-allowed' 
-                    : 'bg-primary text-white hover:bg-opacity-90'
-                }`}
-              >
-                Next
-              </button>
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <span className="text-lg">Loading...</span>
             </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {currentProducts.map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex justify-center space-x-2 mt-8 mb-4">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded ${
+                      currentPage === 1 
+                        ? 'bg-gray-300 cursor-not-allowed' 
+                        : 'bg-primary text-white hover:bg-opacity-90'
+                    }`}
+                  >
+                    Previous
+                  </button>
+                  
+                  {[...Array(totalPages)].map((_, index) => (
+                    <button
+                      key={index + 1}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`px-4 py-2 rounded ${
+                        currentPage === index + 1
+                          ? 'bg-primary text-white'
+                          : 'bg-gray-200 hover:bg-gray-300'
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                  
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded ${
+                      currentPage === totalPages 
+                        ? 'bg-gray-300 cursor-not-allowed' 
+                        : 'bg-primary text-white hover:bg-opacity-90'
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
