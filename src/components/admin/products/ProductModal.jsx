@@ -13,6 +13,7 @@ function ProductModal({ isOpen, onClose, product }) {
       reset({
         name: '',
         category: '',
+        genre: '',
         price: '',
         stock: '',
         description: '',
@@ -22,28 +23,27 @@ function ProductModal({ isOpen, onClose, product }) {
   }, [product, reset]);
 
   const onSubmit = async (data) => {
-    // Formate os dados
     const formattedData = {
-        ...data,
-        price: parseFloat(data.price), // Converte para número decimal
-        stock: parseInt(data.stock, 10), // Converte para número inteiro
+      ...data,
+      price: parseFloat(data.price),
+      stock: parseInt(data.stock, 10)
     };
 
     try {
-        console.log("Dados formatados enviados:", formattedData); // Log dos dados formatados
-        if (product) {
-            await axios.put(`http://localhost:5000/api/products/${product.id}`, formattedData);
-            alert("Produto atualizado com sucesso!");
-        } else {
-            await axios.post("http://localhost:5000/api/products", formattedData);
-            alert("Produto criado com sucesso!");
-        }
-        onClose();
+      console.log("Dados formatados enviados:", formattedData);
+      if (product) {
+        await axios.put(`http://localhost:5000/api/products/${product.id}`, formattedData);
+        alert("Produto atualizado com sucesso!");
+      } else {
+        await axios.post("http://localhost:5000/api/products", formattedData);
+        alert("Produto criado com sucesso!");
+      }
+      onClose();
     } catch (error) {
-        console.error("Erro ao salvar o produto:", error);
-        alert("Não foi possível salvar o produto.");
+      console.error("Erro ao salvar o produto:", error);
+      alert("Não foi possível salvar o produto.");
     }
-};
+  };
 
   if (!isOpen) return null;
 
@@ -86,6 +86,36 @@ function ProductModal({ isOpen, onClose, product }) {
             </select>
             {errors.category && (
               <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Genre <span className="text-red-500">*</span>
+            </label>
+            <select
+              {...register('genre', {
+                required: 'Genre is required'
+              })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
+            >
+              <option value="">Select genre</option>
+              <option value="Action">Action</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Comedy">Comedy</option>
+              <option value="Drama">Drama</option>
+              <option value="Fantasy">Fantasy</option>
+              <option value="Horror">Horror</option>
+              <option value="Romance">Romance</option>
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Slice of Life">Slice of Life</option>
+              <option value="Sports">Sports</option>
+              <option value="Game">Game</option>
+              <option value="Anime">Anime</option>
+              <option value="Other">Other</option>
+            </select>
+            {errors.genre && (
+              <p className="mt-1 text-sm text-red-600">{errors.genre.message}</p>
             )}
           </div>
 

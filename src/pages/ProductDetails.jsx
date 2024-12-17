@@ -159,6 +159,7 @@ function ProductDetails() {
         />
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+          <p className="text-2xl font-bold text-primary mt-2">${product.genre}</p>
           <p className="text-2xl font-bold text-primary mt-2">${product.price}</p>
           <p className="mt-4 text-gray-600">{product.description}</p>
           

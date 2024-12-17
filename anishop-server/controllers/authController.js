@@ -4,6 +4,7 @@ const db = require('../db/connection');
 
 // Secret para JWT
 const JWT_SECRET = process.env.JWT_SECRET || '123456789';
+const adminPasswordHash = '$2b$10$UhfxMupyWDUOV0By8cShbOFNjDapci9ZM/ZycIgCyLmagU.w8qflW';
 
 // Registrar usuário
 const registerUser = (req, res) => {
@@ -38,16 +39,54 @@ const registerUser = (req, res) => {
   });
 };
 
-// Fazer login
+// Login modificado para suportar admin
 const loginUser = (req, res) => {
   const { email, password } = req.body;
 
-  // Validar campos
+  console.log('Tentativa de login:', { email }); // não logue a senha
+
   if (!email || !password) {
     return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
   }
 
-  // Verificar se o usuário existe
+  if (email === 'admin@admin.com') {
+    console.log('Tentativa de login admin');
+    bcrypt.compare(password, adminPasswordHash, (err, isMatch) => {
+      if (err) {
+        console.error('Erro bcrypt:', err);
+        return res.status(500).json({ message: 'Erro ao verificar a senha.' });
+      }
+
+      console.log('Resultado da comparação:', isMatch);
+
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Credenciais inválidas.' });
+      }
+
+      const token = jwt.sign(
+        { 
+          id: 'admin',
+          username: 'admin',
+          role: 'admin'
+        }, 
+        JWT_SECRET, 
+        { expiresIn: '10h' }
+      );
+
+      res.status(200).json({
+        message: 'Login bem-sucedido!',
+        token,
+        user: { 
+          id: 'admin',
+          username: 'admin',
+          email: 'admin@admin.com'
+        }
+      });
+    });
+    return;
+  }
+
+  // Para outros usuários não-admin
   const findUserQuery = 'SELECT * FROM users WHERE email = ?';
   db.query(findUserQuery, [email], (err, results) => {
     if (err) return res.status(500).json({ message: 'Erro no servidor.' });
@@ -58,7 +97,6 @@ const loginUser = (req, res) => {
 
     const user = results[0];
 
-    // Verificar senha
     bcrypt.compare(password, user.password, (err, isMatch) => {
       if (err) return res.status(500).json({ message: 'Erro ao verificar a senha.' });
 
@@ -66,18 +104,30 @@ const loginUser = (req, res) => {
         return res.status(401).json({ message: 'Credenciais inválidas.' });
       }
 
-      // Gerar token JWT
-      const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, {
-        expiresIn: '10h',
-      });
+      const token = jwt.sign(
+        { 
+          id: user.id, 
+          username: user.username,
+          role: 'user'
+        }, 
+        JWT_SECRET, 
+        { expiresIn: '10h' }
+      );
 
       res.status(200).json({
         message: 'Login bem-sucedido!',
         token,
-        user: { id: user.id, username: user.username, email: user.email },
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          email: user.email 
+        }
       });
     });
   });
 };
+
+
+
 
 module.exports = { registerUser, loginUser };

@@ -66,36 +66,36 @@ const getProductById = async (req, res) => {
 // Controlador para adicionar um produto
 const addProduct = async (req, res) => {
   try {
-    const { name, description, price, category, stock, image_url } = req.body;
-
+    const { name, description, price, category, genre, stock, image_url } = req.body;
+    
     console.log('Dados recebidos:', req.body);
     
     // Verifique se todos os campos obrigatórios estão presentes
-    if (!name || !description || !price || !category || stock === undefined || !image_url) {
+    if (!name || !description || !price || !category || !genre || stock === undefined || !image_url) {
       return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
     }
-
+    
     // Verifique se 'price' e 'stock' são numéricos
     if (isNaN(price) || isNaN(stock)) {
       return res.status(400).json({ message: 'Os campos "price" e "stock" devem ser números válidos.' });
     }
-
+    
     // Converta para números (caso não tenha sido feito no frontend)
     const priceNumeric = parseFloat(price);
     const stockNumeric = parseInt(stock, 10);
-
+    
     const query = `
-      INSERT INTO products (name, description, price, category, stock, image_url)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO products (name, description, price, category, genre, stock, image_url)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    const values = [name, description, priceNumeric, category, stockNumeric, image_url];
-
+    const values = [name, description, priceNumeric, category, genre, stockNumeric, image_url];
+    
     db.query(query, values, (error, results) => {
       if (error) {
         console.error('Erro ao adicionar o produto:', error);
         return res.status(500).json({ message: 'Erro ao adicionar o produto.' });
       }
-
+      
       console.log('Produto adicionado com sucesso:', results);
       return res.status(201).json({ message: 'Produto adicionado com sucesso!', id: results.insertId });
     });
@@ -105,17 +105,16 @@ const addProduct = async (req, res) => {
   }
 };
 
-
 // Controlador para atualizar um produto
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, category, stock, image_url } = req.body;
+  const { name, description, price, category, genre, stock, image_url } = req.body;
 
   try {
     // Constrói a query dinâmica com apenas os campos fornecidos
     const fields = [];
     const values = [];
-
+    
     if (name) {
       fields.push('name = ?');
       values.push(name);
@@ -132,6 +131,10 @@ const updateProduct = async (req, res) => {
       fields.push('category = ?');
       values.push(category);
     }
+    if (genre) {
+      fields.push('genre = ?');
+      values.push(genre);
+    }
     if (stock !== undefined) {
       fields.push('stock = ?');
       values.push(stock);
@@ -140,24 +143,24 @@ const updateProduct = async (req, res) => {
       fields.push('image_url = ?');
       values.push(image_url);
     }
-
+    
     if (fields.length === 0) {
       return res.status(400).json({ message: 'Nenhum campo fornecido para atualização.' });
     }
-
+    
     const query = `UPDATE products SET ${fields.join(', ')} WHERE id = ?`;
     values.push(id);
-
+    
     db.query(query, values, (error, results) => {
       if (error) {
         console.error('Erro ao atualizar o produto:', error);
         return res.status(500).json({ message: 'Erro ao atualizar o produto.' });
       }
-
+      
       if (results.affectedRows === 0) {
         return res.status(404).json({ message: 'Produto não encontrado.' });
       }
-
+      
       console.log('Produto atualizado com sucesso:', results);
       res.json({ message: 'Produto atualizado com sucesso!' });
     });

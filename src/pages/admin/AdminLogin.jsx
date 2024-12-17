@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Certifique-se de instalar: npm install axios
+import axios from 'axios'; 
 
 // Validação do formulário usando Yup
 const schema = yup.object().shape({
@@ -23,31 +23,34 @@ function Login() {
 
   const onSubmit = async (data) => {
     try {
-      // Enviar dados para o backend
+      console.log('Tentando login com:', {
+        email: data.email,
+        password: data.password
+      });
+
       const response = await axios.post('http://localhost:5000/api/auth/login', {
         email: data.email,
         password: data.password,
       });
-  
-      console.log(response.data); // Verifique o que o backend está retornando
-  
+
+      console.log(response.data);
+
       if (response.status === 200) {
-        // Armazenar o token e o nome do usuário no localStorage
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userName', response.data.user.username); // Ou response.data.userName
-  
-        // Exibir sucesso e redirecionar o usuário para a página principal
+        localStorage.setItem('userName', response.data.user.username);
         alert('Login successful!');
-        navigate('/admin/dashboard'); // Redireciona para a página inicial
+        navigate('/admin/dashboard');
       }
     } catch (error) {
-      if (error.response && error.response.status === 400) {
-        alert(error.response.data.message); // Exibir mensagem de erro do backend
+      console.error('Erro completo:', error);
+      if (error.response) {
+        console.error('Resposta do servidor:', error.response.data);
+        alert(error.response.data.message);
       } else {
         alert('An error occurred. Please try again later.');
       }
     }
-  };
+};
   
   
 

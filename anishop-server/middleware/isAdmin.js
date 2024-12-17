@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const secretKey = '123456789'; // Use your secret key
+const secretKey = process.env.JWT_SECRET || '123456789';
 
 const isAdmin = (req, res, next) => {
     try {
