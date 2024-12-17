@@ -5,18 +5,30 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 function UserList({ onEdit }) {
   const [users, setUsers] = useState([]);
 
-  // Função para buscar utilizadores da API
+  // Configuração do axios com o token
+  const getAuthHeaders = () => ({
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users'); // Substitua com o endpoint correto
-      setUsers(response.data); // Atualiza o estado com os dados da API
+      const response = await axios.get(
+        'http://localhost:5000/api/users',
+        getAuthHeaders()
+      );
+      setUsers(response.data);
     } catch (error) {
       console.error('Erro ao buscar os utilizadores:', error);
-      alert('Não foi possível carregar os utilizadores.');
+      if (error.response?.status === 403) {
+        alert('Você não tem permissão para ver os usuários.');
+      } else {
+        alert('Não foi possível carregar os utilizadores.');
+      }
     }
   };
 
-  // useEffect para carregar os utilizadores ao montar o componente
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -25,11 +37,19 @@ function UserList({ onEdit }) {
   const handleDelete = async (userId) => {
     if (window.confirm('Tem certeza que deseja deletar este utilizador?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/users/${userId}`); // Substitua com o endpoint correto
-        setUsers(users.filter((user) => user.id !== userId)); // Remove o utilizador da lista local
+        await axios.delete(
+          `http://localhost:5000/api/users/${userId}`,
+          getAuthHeaders()
+        );
+        setUsers(users.filter((user) => user.id !== userId));
+        alert('Usuário deletado com sucesso!');
       } catch (error) {
         console.error('Erro ao deletar o utilizador:', error);
-        alert('Não foi possível deletar o utilizador.');
+        if (error.response?.status === 403) {
+          alert('Você não tem permissão para deletar usuários.');
+        } else {
+          alert('Não foi possível deletar o utilizador.');
+        }
       }
     }
   };

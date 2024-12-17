@@ -52,7 +52,7 @@ console.log('Registering order routes...');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoute);
-app.use('/api', userRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api', CheckoutRoute);
 app.use('/api/checkout', CheckoutRoute);
 app.use('/api/orders', orderDetailsRoute);
