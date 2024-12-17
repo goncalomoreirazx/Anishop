@@ -17,6 +17,7 @@ import OrderSuccess from './pages/OrderSuccess';
 import AdminLogin from './pages/admin/AdminLogin';
 import BuyHistory from './pages/BuyHistory';
 import AdminOrders from './pages/admin/AdminOrder';
+import AdminRoute from './components/admin/AdminRoute';
 
 function App() {
   return (
@@ -33,15 +34,32 @@ function App() {
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<Dashboard/>} />
-            <Route path="/admin/products" element={<Products />} />
-            <Route path="/admin/upload" element={<Upload/>}/> 
-            <Route path="/admin/users" element={<Users/>}/> 
             <Route path='order-success' element={<OrderSuccess/>}/>
             <Route path='/buy-history' element={<BuyHistory/>}/>
-            <Route path='/admin/admin-orders' element={<AdminOrders/>}/>
+            {/* Rota de login admin - pública */}
+            <Route path="/admin/login" element={<AdminLogin />} />
             
+            {/* Rotas protegidas do admin */}
+            <Route 
+              path="/admin/dashboard" 
+              element={<AdminRoute><Dashboard /></AdminRoute>} 
+            />
+            <Route 
+              path="/admin/products" 
+              element={<AdminRoute><Products /></AdminRoute>} 
+            />
+            <Route 
+              path="/admin/upload" 
+              element={<AdminRoute><Upload /></AdminRoute>} 
+            />
+            <Route 
+              path="/admin/users" 
+              element={<AdminRoute><Users /></AdminRoute>} 
+            />
+            <Route 
+              path="/admin/admin-orders" 
+              element={<AdminRoute><AdminOrders /></AdminRoute>} 
+            />
           </Routes>
         </main>
         <Footer />

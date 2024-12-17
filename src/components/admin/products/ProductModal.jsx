@@ -6,6 +6,13 @@ import axios from 'axios';
 function ProductModal({ isOpen, onClose, product }) {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
+  // Adicione esta função para obter os headers com o token
+  const getAuthHeaders = () => ({
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+
   useEffect(() => {
     if (product) {
       reset(product);
@@ -32,16 +39,28 @@ function ProductModal({ isOpen, onClose, product }) {
     try {
       console.log("Dados formatados enviados:", formattedData);
       if (product) {
-        await axios.put(`http://localhost:5000/api/products/${product.id}`, formattedData);
+        await axios.put(
+          `http://localhost:5000/api/products/${product.id}`, 
+          formattedData,
+          getAuthHeaders() // Adiciona os headers com o token
+        );
         alert("Produto atualizado com sucesso!");
       } else {
-        await axios.post("http://localhost:5000/api/products", formattedData);
+        await axios.post(
+          "http://localhost:5000/api/products", 
+          formattedData,
+          getAuthHeaders() // Adiciona os headers com o token
+        );
         alert("Produto criado com sucesso!");
       }
       onClose();
     } catch (error) {
       console.error("Erro ao salvar o produto:", error);
-      alert("Não foi possível salvar o produto.");
+      if (error.response?.status === 403) {
+        alert("Você não tem permissão para realizar esta operação. Certifique-se de que está logado como admin.");
+      } else {
+        alert("Não foi possível salvar o produto.");
+      }
     }
   };
 

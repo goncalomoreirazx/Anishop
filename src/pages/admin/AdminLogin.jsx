@@ -39,7 +39,7 @@ function Login() {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userName', response.data.user.username);
         alert('Login successful!');
-        navigate('/admin/dashboard');
+        navigate('admin/dashboard');
       }
     } catch (error) {
       console.error('Erro completo:', error);
