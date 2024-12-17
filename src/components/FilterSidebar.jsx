@@ -1,12 +1,48 @@
-function FilterSidebar({ filters, onFilterChange }) {
+function FilterSidebar({ filters, onFilterChange, shopType }) {
+  // Lista base de gêneros
+  const baseGenres = [
+    'Action',
+    'Adventure',
+    'Comedy',
+    'Drama',
+    'Fantasy',
+    'Romance',
+    'Sci-Fi',
+    'Slice of Life',
+    'Horror',
+    'Sports',
+    'Game',
+    'Other'
+  ];
+
+  // Adiciona 'Anime' apenas se for a animeShop
+  const genres = shopType === 'anime' 
+    ? [...baseGenres, 'Anime']
+    : baseGenres;
+
+  // Função para resetar todos os filtros
+  const handleReset = () => {
+    onFilterChange('priceRange', '');
+    onFilterChange('genres', []);
+    onFilterChange('sortBy', 'popular');
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold mb-4">Filters</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Filters</h3>
+        <button
+          onClick={handleReset}
+          className="px-3 py-1 text-sm text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors"
+        >
+          Reset Filters
+        </button>
+      </div>
       
       {/* Price Range */}
       <div className="mb-6">
         <h4 className="font-medium mb-2">Price Range</h4>
-        <select 
+        <select
           className="w-full p-2 border rounded-md"
           onChange={(e) => onFilterChange('priceRange', e.target.value)}
           value={filters.priceRange}
@@ -19,24 +55,24 @@ function FilterSidebar({ filters, onFilterChange }) {
         </select>
       </div>
 
-      {/* Categories */}
+      {/* Genre */}
       <div className="mb-6">
-        <h4 className="font-medium mb-2">Categories</h4>
+        <h4 className="font-medium mb-2">Genres</h4>
         <div className="space-y-2">
-          {['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy'].map(category => (
-            <label key={category} className="flex items-center">
+          {genres.map(genre => (
+            <label key={genre} className="flex items-center">
               <input
                 type="checkbox"
                 className="form-checkbox text-primary"
-                checked={filters.categories?.includes(category)}
+                checked={filters.genres?.includes(genre)}
                 onChange={(e) => {
-                  const newCategories = e.target.checked
-                    ? [...(filters.categories || []), category]
-                    : (filters.categories || []).filter(c => c !== category);
-                  onFilterChange('categories', newCategories);
+                  const newGenres = e.target.checked
+                    ? [...(filters.genres || []), genre]
+                    : (filters.genres || []).filter(g => g !== genre);
+                  onFilterChange('genres', newGenres);
                 }}
               />
-              <span className="ml-2">{category}</span>
+              <span className="ml-2">{genre}</span>
             </label>
           ))}
         </div>
@@ -45,7 +81,7 @@ function FilterSidebar({ filters, onFilterChange }) {
       {/* Sort By */}
       <div className="mb-6">
         <h4 className="font-medium mb-2">Sort By</h4>
-        <select 
+        <select
           className="w-full p-2 border rounded-md"
           onChange={(e) => onFilterChange('sortBy', e.target.value)}
           value={filters.sortBy}

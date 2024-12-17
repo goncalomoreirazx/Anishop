@@ -36,6 +36,7 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path='order-success' element={<OrderSuccess/>}/>
             <Route path='/buy-history' element={<BuyHistory/>}/>
+            
             {/* Rota de login admin - pública */}
             <Route path="/admin/login" element={<AdminLogin />} />
             

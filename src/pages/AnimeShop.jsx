@@ -6,7 +6,7 @@ import axios from 'axios';
 function AnimeShop() {
   const [filters, setFilters] = useState({
     priceRange: '',
-    categories: [],
+    genres: [],
     sortBy: 'popular'
   });
   const [products, setProducts] = useState([]);
@@ -52,8 +52,10 @@ function AnimeShop() {
       return true;
     })
     .filter(product => {
-      if (filters.categories?.length > 0) {
-        return filters.categories.includes(product.category);
+      // Lógica corrigida para trabalhar com genre único
+      if (filters.genres?.length > 0) {
+        // Verifica se o gênero do produto está entre os selecionados
+        return filters.genres.includes(product.genre);
       }
       return true;
     })
@@ -88,7 +90,10 @@ function AnimeShop() {
       <h1 className="text-3xl font-bold text-dark mb-8">Anime Shop</h1>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-64">
-          <FilterSidebar filters={filters} onFilterChange={handleFilterChange} />
+          <FilterSidebar 
+          filters={filters} 
+          onFilterChange={handleFilterChange} 
+          shopType="anime" />
         </div>
         <div className="flex-1">
           {loading ? (
