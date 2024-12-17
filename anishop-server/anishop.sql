@@ -104,7 +104,6 @@ CREATE TABLE IF NOT EXISTS `products` (
   `description` text,
   `price` decimal(10,2) NOT NULL,
   `category` varchar(50) DEFAULT NULL,
-  `genre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `stock` int NOT NULL DEFAULT '0',
   `image_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -112,29 +111,39 @@ CREATE TABLE IF NOT EXISTS `products` (
 ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- A despejar dados para tabela anishop.products: ~19 rows (aproximadamente)
-INSERT INTO `products` (`id`, `name`, `description`, `price`, `category`, `genre`, `stock`, `image_url`, `created_at`) VALUES
-	(1, 'Attack On Titan Volume 1', 'Volume 1 of the Attack on Titan', 30.00, 'Manga', 'Action', 19, 'AoT1.jpg', '2024-12-02 20:53:33'),
-	(3, 'Attack on Titan Volume 2', '22', 22.00, 'Manga', 'Action', 22, 'Aot2.jpg', '2024-12-03 16:23:06'),
-	(4, 'Frieren Volume 1', 'First volume of the famous manga Frieren', 27.00, 'Manga', 'Adventure', 14, 'Frieren1.jpg', '2024-12-04 17:16:04'),
-	(5, 'My Hero Academy Volume 1', 'First Volume of the manga My Hero Academia', 22.00, 'Manga', 'Adventure', 20, 'MyHeroA1.jpg', '2024-12-04 17:16:59'),
-	(6, 'Solo Leveling Volume 8', 'Volume 8 of the famous korean manhwa Solo Leveling', 22.00, 'Manga', 'Action', 18, 'SoloL8.jpg', '2024-12-04 17:18:32'),
-	(7, 'Jellal POP Figure', 'POP Figure of Fairy Tail ', 20.00, 'Figures', 'Anime', 9, 'JellalPoP1.jpg', '2024-12-04 17:26:26'),
-	(8, 'Xiao Stuffed ', 'Little Stuffed Xiao from Genshin Impact', 10.00, 'Accessories', 'Game', 10, 'Xiao1.jpg', '2024-12-04 17:28:32'),
-	(9, 'Itachi Figure', 'Itachi Figure of Naruto Series ', 50.00, 'Figures', 'Anime', 7, 'Itachi1.jpg', '2024-12-04 17:29:26'),
-	(10, 'Gojo Figure', 'Gojo Figure from Jujutsu Kaisen Series', 50.00, 'Figures', 'Anime', 10, 'Gojo1.jpg', '2024-12-04 17:30:21'),
-	(11, 'Zoro Figure', 'Zoro Figure from One Piece Series', 50.00, 'Figures', 'Anime', 20, 'Zoro1.jpg', '2024-12-04 17:31:03'),
-	(13, 'Estojo Xiao', 'Estojo do Xiao personagem do jogo Genshin Impact', 15.00, 'Accessories', 'Game', 20, 'EstojoXiao1.jpg', '2024-12-04 17:32:17'),
-	(14, 'Howls Moving Castle', 'Movie from Studio Ghibli', 15.00, 'Anime', 'Fantasy', 25, 'Howl-s-Moving-Castle.jpg', '2024-12-04 17:35:02'),
-	(15, 'Solo Leveling Volume 1', 'First Volume of the famous korean manhwa Solo Leveling', 15.00, 'Manga', 'Action', 13, 'SoloL1.jpg', '2024-12-10 12:24:03'),
-	(16, 'Kimi no Nawa ', 'Filme Kimi no Nawa ou Your Name realizado por Makoto Shinkai.', 12.00, 'Anime', 'Sci-Fi', 20, 'Yourname.jpg', '2024-12-12 15:01:33'),
-	(17, 'Ponyo', 'Filme Ponyo, The Studio Ghibli Collection', 12.00, 'Anime', 'Fantasy', 20, 'Ponyo.jpg', '2024-12-12 15:03:03'),
-	(18, 'One Piece Volume 1 ', 'One Piece Volume 1 ', 22.00, 'Manga', 'Adventure', 20, 'OneP1.jpg', '2024-12-13 01:10:44'),
-	(20, 'Samurai X Volume 1', 'Primeiro Volume de Samurai X', 20.00, 'Manga', 'Action', 20, 'SamuraiX1.jpg', '2024-12-14 12:17:25'),
-	(21, 'Tokyo Revengers Volume 1', 'Volume 1 do Manga Tokyo Revengers', 20.00, 'Manga', 'Sci-Fi', 20, 'TokyoR1.jpg', '2024-12-14 12:22:35'),
-	(22, 'Naruto Manga Pack', 'Pack de Manga Naruto do Volume 1 ao 3', 40.00, 'Manga', 'Adventure', 10, 'Naruto123.jpg', '2024-12-14 12:23:42'),
-	(23, 'Jujustu Kaisen Volume 1  ', 'Volume 1 do Manga Jujustsu Kaisen', 20.00, 'Manga', 'Action', 20, 'JujuK1.jpg', '2024-12-14 12:24:52'),
-	(24, 'Pack Genshin Impact ', 'Pack de 6 porta chaves de Genshin Impact', 30.00, 'Accessories', 'Game', 20, 'GenshinPack.jpg', '2024-12-14 12:35:13'),
-	(26, 'slayer', '1221', 12.00, 'Manga', 'Action', 12, '12', '2024-12-17 15:35:45');
+INSERT INTO `products` (`id`, `name`, `description`, `price`, `category`, `stock`, `image_url`, `created_at`) VALUES
+	(1, 'Attack On Titan Volume 1', 'Volume 1 of the Attack on Titan', 30.00, 'Manga', 19, 'AoT1.jpg', '2024-12-02 20:53:33'),
+	(3, 'Attack on Titan Volume 2', '22', 22.00, 'Manga', 22, 'Aot2.jpg', '2024-12-03 16:23:06'),
+	(4, 'Frieren Volume 1', 'First volume of the famous manga Frieren', 27.00, 'Manga', 14, 'Frieren1.jpg', '2024-12-04 17:16:04'),
+	(5, 'My Hero Academy Volume 1', 'First Volume of the manga My Hero Academia', 22.00, 'Manga', 20, 'MyHeroA1.jpg', '2024-12-04 17:16:59'),
+	(6, 'Solo Leveling Volume 8', 'Volume 8 of the famous korean manhwa Solo Leveling', 22.00, 'Manga', 18, 'SoloL8.jpg', '2024-12-04 17:18:32'),
+	(7, 'Jellal POP Figure', 'POP Figure of Fairy Tail ', 20.00, 'Figures', 9, 'JellalPoP1.jpg', '2024-12-04 17:26:26'),
+	(8, 'Xiao Stuffed ', 'Little Stuffed Xiao from Genshin Impact', 10.00, 'Accessories', 10, 'Xiao1.jpg', '2024-12-04 17:28:32'),
+	(9, 'Itachi Figure', 'Itachi Figure of Naruto Series ', 50.00, 'Figures', 7, 'Itachi1.jpg', '2024-12-04 17:29:26'),
+	(10, 'Gojo Figure', 'Gojo Figure from Jujutsu Kaisen Series', 50.00, 'Figures', 10, 'Gojo1.jpg', '2024-12-04 17:30:21'),
+	(11, 'Zoro Figure', 'Zoro Figure from One Piece Series', 50.00, 'Figures', 20, 'Zoro1.jpg', '2024-12-04 17:31:03'),
+	(13, 'Estojo Xiao', 'Estojo do Xiao personagem do jogo Genshin Impact', 15.00, 'Accessories', 20, 'EstojoXiao1.jpg', '2024-12-04 17:32:17'),
+	(14, 'Howls Moving Castle', 'Movie from Studio Ghibli', 15.00, 'Anime', 25, 'Howl-s-Moving-Castle.jpg', '2024-12-04 17:35:02'),
+	(15, 'Solo Leveling Volume 1', 'First Volume of the famous korean manhwa Solo Leveling', 15.00, 'Manga', 13, 'SoloL1.jpg', '2024-12-10 12:24:03'),
+	(16, 'Kimi no Nawa ', 'Filme Kimi no Nawa ou Your Name realizado por Makoto Shinkai.', 12.00, 'Anime', 20, 'Yourname.jpg', '2024-12-12 15:01:33'),
+	(17, 'Ponyo', 'Filme Ponyo, The Studio Ghibli Collection', 12.00, 'Anime', 20, 'Ponyo.jpg', '2024-12-12 15:03:03'),
+	(18, 'One Piece Volume 1 ', 'One Piece Volume 1 ', 22.00, 'Manga', 20, 'OneP1.jpg', '2024-12-13 01:10:44'),
+	(20, 'Samurai X Volume 1', 'Primeiro Volume de Samurai X', 20.00, 'Manga', 20, 'SamuraiX1.jpg', '2024-12-14 12:17:25'),
+	(21, 'Tokyo Revengers Volume 1', 'Volume 1 do Manga Tokyo Revengers', 20.00, 'Manga', 20, 'TokyoR1.jpg', '2024-12-14 12:22:35'),
+	(22, 'Naruto Manga Pack', 'Pack de Manga Naruto do Volume 1 ao 3', 40.00, 'Manga', 10, 'Naruto123.jpg', '2024-12-14 12:23:42'),
+	(23, 'Jujustu Kaisen Volume 1  ', 'Volume 1 do Manga Jujustsu Kaisen', 20.00, 'Manga', 20, 'JujuK1.jpg', '2024-12-14 12:24:52'),
+	(24, 'Pack Genshin Impact ', 'Pack de 6 porta chaves de Genshin Impact', 30.00, 'Accessories', 20, 'GenshinPack.jpg', '2024-12-14 12:35:13'),
+	(26, 'slayer', '1221', 12.00, 'Manga', 12, '12', '2024-12-17 15:35:45');
+
+-- A despejar estrutura para tabela anishop.product_genres
+CREATE TABLE IF NOT EXISTS `product_genres` (
+  `product_id` int NOT NULL,
+  `genre` varchar(50) NOT NULL,
+  PRIMARY KEY (`product_id`,`genre`),
+  CONSTRAINT `product_genres_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- A despejar dados para tabela anishop.product_genres: ~0 rows (aproximadamente)
 
 -- A despejar estrutura para tabela anishop.product_images
 CREATE TABLE IF NOT EXISTS `product_images` (

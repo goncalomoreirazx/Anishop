@@ -1,18 +1,28 @@
-const db = require('../db/connection'); // Ajuste o caminho para o seu arquivo de conexão com o banco de dados
+const db = require('../db/connection');
 
 // Controlador para buscar todos os produtos
 const getAllProducts = async (req, res) => {
   try {
-    const query = `SELECT * FROM products`; // Realiza o SELECT * para pegar todos os dados
+    const query = `
+      SELECT p.*, GROUP_CONCAT(pg.genre) as genres
+      FROM products p
+      LEFT JOIN product_genres pg ON p.id = pg.product_id
+      GROUP BY p.id
+    `;
 
     db.query(query, (error, results) => {
       if (error) {
         console.error('Erro ao buscar os produtos:', error);
         return res.status(500).json({ message: 'Erro ao buscar os produtos.' });
       }
-
       
-      res.json(results); // Retorna os resultados da consulta para o cliente
+      // Converter a string de gêneros em array
+      const productsWithGenres = results.map(product => ({
+        ...product,
+        genres: product.genres ? product.genres.split(',') : []
+      }));
+      
+      res.json(productsWithGenres);
     });
   } catch (error) {
     console.error('Erro ao buscar os produtos:', error);
@@ -20,16 +30,27 @@ const getAllProducts = async (req, res) => {
   }
 };
 
+// Controlador para buscar produto por ID
 const getProductById = async (req, res) => {
   const productId = req.params.id;
 
   try {
-    // Consulta para buscar o produto e as imagens relacionadas
     const query = `
-      SELECT p.id, p.name, p.description, p.price, p.stock, p.image_url AS mainImage, pi.image_url AS additionalImages
+      SELECT 
+        p.id, 
+        p.name, 
+        p.description, 
+        p.price, 
+        p.category,
+        p.stock, 
+        p.image_url AS mainImage,
+        GROUP_CONCAT(DISTINCT pg.genre) as genres,
+        GROUP_CONCAT(DISTINCT pi.image_url) as additionalImages
       FROM products p
+      LEFT JOIN product_genres pg ON p.id = pg.product_id
       LEFT JOIN product_images pi ON p.id = pi.product_id
       WHERE p.id = ?
+      GROUP BY p.id
     `;
 
     db.query(query, [productId], (error, results) => {
@@ -42,18 +63,20 @@ const getProductById = async (req, res) => {
         return res.status(404).json({ message: 'Produto não encontrado.' });
       }
 
-      // Organize os resultados separando a imagem principal das imagens adicionais
+      // Organizar os resultados
       const product = {
         id: results[0].id,
         name: results[0].name,
         description: results[0].description,
         price: results[0].price,
+        category: results[0].category,
         stock: results[0].stock,
-        mainImage: results[0].mainImage, // A primeira imagem é a principal
-        images: results.map(result => result.additionalImages).filter(Boolean) // Imagens adicionais
+        mainImage: results[0].mainImage,
+        genres: results[0].genres ? results[0].genres.split(',') : [],
+        images: results[0].additionalImages ? results[0].additionalImages.split(',') : []
       };
 
-      res.json(product); // Retorna o produto com a imagem principal e as imagens adicionais
+      res.json(product);
     });
   } catch (error) {
     console.error('Erro ao buscar produto:', error);
@@ -61,17 +84,15 @@ const getProductById = async (req, res) => {
   }
 };
 
-
-
 // Controlador para adicionar um produto
 const addProduct = async (req, res) => {
   try {
-    const { name, description, price, category, genre, stock, image_url } = req.body;
+    const { name, description, price, category, genres, stock, image_url } = req.body;
     
     console.log('Dados recebidos:', req.body);
     
     // Verifique se todos os campos obrigatórios estão presentes
-    if (!name || !description || !price || !category || !genre || stock === undefined || !image_url) {
+    if (!name || !description || !price || !category || !genres || !genres.length || stock === undefined || !image_url) {
       return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
     }
     
@@ -80,24 +101,61 @@ const addProduct = async (req, res) => {
       return res.status(400).json({ message: 'Os campos "price" e "stock" devem ser números válidos.' });
     }
     
-    // Converta para números (caso não tenha sido feito no frontend)
+    // Converta para números
     const priceNumeric = parseFloat(price);
     const stockNumeric = parseInt(stock, 10);
     
-    const query = `
-      INSERT INTO products (name, description, price, category, genre, stock, image_url)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-    const values = [name, description, priceNumeric, category, genre, stockNumeric, image_url];
-    
-    db.query(query, values, (error, results) => {
-      if (error) {
-        console.error('Erro ao adicionar o produto:', error);
-        return res.status(500).json({ message: 'Erro ao adicionar o produto.' });
+    // Usar transação para garantir que tanto o produto quanto seus gêneros sejam salvos
+    db.beginTransaction(async (err) => {
+      if (err) throw err;
+
+      try {
+        // Primeiro, insere o produto
+        const insertProductQuery = `
+          INSERT INTO products (name, description, price, category, stock, image_url)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        const productValues = [name, description, priceNumeric, category, stockNumeric, image_url];
+        
+        db.query(insertProductQuery, productValues, async (error, results) => {
+          if (error) {
+            return db.rollback(() => {
+              throw error;
+            });
+          }
+
+          const productId = results.insertId;
+
+          // Depois, insere os gêneros
+          const insertGenresQuery = `
+            INSERT INTO product_genres (product_id, genre)
+            VALUES ?
+          `;
+          const genreValues = genres.map(genre => [productId, genre]);
+
+          db.query(insertGenresQuery, [genreValues], (error) => {
+            if (error) {
+              return db.rollback(() => {
+                throw error;
+              });
+            }
+
+            db.commit((err) => {
+              if (err) {
+                return db.rollback(() => {
+                  throw err;
+                });
+              }
+              res.status(201).json({ 
+                message: 'Produto adicionado com sucesso!', 
+                id: productId 
+              });
+            });
+          });
+        });
+      } catch (error) {
+        throw error;
       }
-      
-      console.log('Produto adicionado com sucesso:', results);
-      return res.status(201).json({ message: 'Produto adicionado com sucesso!', id: results.insertId });
     });
   } catch (error) {
     console.error('Erro ao adicionar o produto:', error);
@@ -108,61 +166,90 @@ const addProduct = async (req, res) => {
 // Controlador para atualizar um produto
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, category, genre, stock, image_url } = req.body;
+  const { name, description, price, category, genres, stock, image_url } = req.body;
 
   try {
-    // Constrói a query dinâmica com apenas os campos fornecidos
-    const fields = [];
-    const values = [];
-    
-    if (name) {
-      fields.push('name = ?');
-      values.push(name);
-    }
-    if (description) {
-      fields.push('description = ?');
-      values.push(description);
-    }
-    if (price !== undefined) {
-      fields.push('price = ?');
-      values.push(price);
-    }
-    if (category) {
-      fields.push('category = ?');
-      values.push(category);
-    }
-    if (genre) {
-      fields.push('genre = ?');
-      values.push(genre);
-    }
-    if (stock !== undefined) {
-      fields.push('stock = ?');
-      values.push(stock);
-    }
-    if (image_url) {
-      fields.push('image_url = ?');
-      values.push(image_url);
-    }
-    
-    if (fields.length === 0) {
-      return res.status(400).json({ message: 'Nenhum campo fornecido para atualização.' });
-    }
-    
-    const query = `UPDATE products SET ${fields.join(', ')} WHERE id = ?`;
-    values.push(id);
-    
-    db.query(query, values, (error, results) => {
-      if (error) {
-        console.error('Erro ao atualizar o produto:', error);
-        return res.status(500).json({ message: 'Erro ao atualizar o produto.' });
+    db.beginTransaction(async (err) => {
+      if (err) throw err;
+
+      try {
+        // Atualiza os dados básicos do produto
+        const fields = [];
+        const values = [];
+        
+        if (name) {
+          fields.push('name = ?');
+          values.push(name);
+        }
+        if (description) {
+          fields.push('description = ?');
+          values.push(description);
+        }
+        if (price !== undefined) {
+          fields.push('price = ?');
+          values.push(price);
+        }
+        if (category) {
+          fields.push('category = ?');
+          values.push(category);
+        }
+        if (stock !== undefined) {
+          fields.push('stock = ?');
+          values.push(stock);
+        }
+        if (image_url) {
+          fields.push('image_url = ?');
+          values.push(image_url);
+        }
+        
+        if (fields.length > 0) {
+          const updateProductQuery = `UPDATE products SET ${fields.join(', ')} WHERE id = ?`;
+          values.push(id);
+          
+          await new Promise((resolve, reject) => {
+            db.query(updateProductQuery, values, (error, results) => {
+              if (error) reject(error);
+              else resolve(results);
+            });
+          });
+        }
+
+        // Atualiza os gêneros se foram fornecidos
+        if (genres && genres.length > 0) {
+          // Remove gêneros antigos
+          await new Promise((resolve, reject) => {
+            db.query('DELETE FROM product_genres WHERE product_id = ?', [id], (error) => {
+              if (error) reject(error);
+              else resolve();
+            });
+          });
+
+          // Insere novos gêneros
+          const insertGenresQuery = `
+            INSERT INTO product_genres (product_id, genre)
+            VALUES ?
+          `;
+          const genreValues = genres.map(genre => [id, genre]);
+
+          await new Promise((resolve, reject) => {
+            db.query(insertGenresQuery, [genreValues], (error) => {
+              if (error) reject(error);
+              else resolve();
+            });
+          });
+        }
+
+        db.commit((err) => {
+          if (err) {
+            return db.rollback(() => {
+              throw err;
+            });
+          }
+          res.json({ message: 'Produto atualizado com sucesso!' });
+        });
+      } catch (error) {
+        throw error;
       }
-      
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ message: 'Produto não encontrado.' });
-      }
-      
-      console.log('Produto atualizado com sucesso:', results);
-      res.json({ message: 'Produto atualizado com sucesso!' });
     });
   } catch (error) {
     console.error('Erro ao atualizar o produto:', error);

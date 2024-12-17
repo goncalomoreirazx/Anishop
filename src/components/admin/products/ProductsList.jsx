@@ -25,13 +25,31 @@ function ProductsList({ onEdit }) {
 
   // Function to delete a product
   const handleDelete = async (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await axios.delete(`http://localhost:5000/api/products/${productId}`);
-        setProducts(products.filter((product) => product.id !== productId)); // Remove the product locally
-      } catch (error) {
-        console.error('Error deleting product:', error);
-        alert('Unable to delete product.');
+    // Adiciona o alerta de confirmação
+    const confirmDelete = window.confirm("Tem certeza de que deseja apagar este produto?");
+    
+    if (!confirmDelete) {
+      return; // Se o usuário cancelar, a função termina aqui
+    }
+  
+    try {
+      // Adiciona o cabeçalho de autorização na requisição DELETE
+      const headers = {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      };
+  
+      // Realiza a requisição DELETE
+      await axios.delete(`http://localhost:5000/api/products/${productId}`, { headers });
+  
+      // Atualiza a lista de produtos após uma exclusão bem-sucedida
+      fetchProducts(); // ou qualquer função que atualiza a lista de produtos
+    } catch (error) {
+      console.error('Error deleting product:', error);
+  
+      if (error.response?.status === 403) {
+        alert('Você não tem permissão para apagar este produto. Certifique-se de estar logado como administrador.');
+      } else {
+        alert('Falha ao apagar o produto. Por favor, tente novamente.');
       }
     }
   };

@@ -1,12 +1,28 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { FaTimes } from 'react-icons/fa';
-import axios from 'axios'; 
+import axios from 'axios';
+import Select from 'react-select';
 
 function ProductModal({ isOpen, onClose, product }) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, control, reset, formState: { errors } } = useForm();
 
-  // Adicione esta função para obter os headers com o token
+  const genreOptions = [
+    { value: 'Action', label: 'Action' },
+    { value: 'Adventure', label: 'Adventure' },
+    { value: 'Comedy', label: 'Comedy' },
+    { value: 'Drama', label: 'Drama' },
+    { value: 'Fantasy', label: 'Fantasy' },
+    { value: 'Horror', label: 'Horror' },
+    { value: 'Romance', label: 'Romance' },
+    { value: 'Sci-Fi', label: 'Sci-Fi' },
+    { value: 'Slice of Life', label: 'Slice of Life' },
+    { value: 'Sports', label: 'Sports' },
+    { value: 'Game', label: 'Game' },
+    { value: 'Anime', label: 'Anime' },
+    { value: 'Other', label: 'Other' }
+  ];
+
   const getAuthHeaders = () => ({
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -15,12 +31,21 @@ function ProductModal({ isOpen, onClose, product }) {
 
   useEffect(() => {
     if (product) {
-      reset(product);
+      // Converter os gêneros do produto para o formato do react-select
+      const formattedGenres = product.genres.map(genre => ({
+        value: genre,
+        label: genre
+      }));
+      
+      reset({
+        ...product,
+        genres: formattedGenres
+      });
     } else {
       reset({
         name: '',
         category: '',
-        genre: '',
+        genres: [],
         price: '',
         stock: '',
         description: '',
@@ -33,23 +58,24 @@ function ProductModal({ isOpen, onClose, product }) {
     const formattedData = {
       ...data,
       price: parseFloat(data.price),
-      stock: parseInt(data.stock, 10)
+      stock: parseInt(data.stock, 10),
+      genres: data.genres.map(genre => genre.value)
     };
 
     try {
       console.log("Dados formatados enviados:", formattedData);
       if (product) {
         await axios.put(
-          `http://localhost:5000/api/products/${product.id}`, 
+          `http://localhost:5000/api/products/${product.id}`,
           formattedData,
-          getAuthHeaders() // Adiciona os headers com o token
+          getAuthHeaders()
         );
         alert("Produto atualizado com sucesso!");
       } else {
         await axios.post(
-          "http://localhost:5000/api/products", 
+          "http://localhost:5000/api/products",
           formattedData,
-          getAuthHeaders() // Adiciona os headers com o token
+          getAuthHeaders()
         );
         alert("Produto criado com sucesso!");
       }
@@ -110,31 +136,24 @@ function ProductModal({ isOpen, onClose, product }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Genre <span className="text-red-500">*</span>
+              Genres <span className="text-red-500">*</span>
             </label>
-            <select
-              {...register('genre', {
-                required: 'Genre is required'
-              })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-            >
-              <option value="">Select genre</option>
-              <option value="Action">Action</option>
-              <option value="Adventure">Adventure</option>
-              <option value="Comedy">Comedy</option>
-              <option value="Drama">Drama</option>
-              <option value="Fantasy">Fantasy</option>
-              <option value="Horror">Horror</option>
-              <option value="Romance">Romance</option>
-              <option value="Sci-Fi">Sci-Fi</option>
-              <option value="Slice of Life">Slice of Life</option>
-              <option value="Sports">Sports</option>
-              <option value="Game">Game</option>
-              <option value="Anime">Anime</option>
-              <option value="Other">Other</option>
-            </select>
-            {errors.genre && (
-              <p className="mt-1 text-sm text-red-600">{errors.genre.message}</p>
+            <Controller
+              name="genres"
+              control={control}
+              rules={{ required: 'At least one genre is required' }}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  isMulti
+                  options={genreOptions}
+                  className="mt-1"
+                  classNamePrefix="select"
+                />
+              )}
+            />
+            {errors.genres && (
+              <p className="mt-1 text-sm text-red-600">{errors.genres.message}</p>
             )}
           </div>
 
@@ -182,8 +201,8 @@ function ProductModal({ isOpen, onClose, product }) {
               {...register('image_url', { required: 'Image URL is required' })}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
             />
-            {errors.image && (
-              <p className="mt-1 text-sm text-red-600">{errors.image.message}</p>
+            {errors.image_url && (
+              <p className="mt-1 text-sm text-red-600">{errors.image_url.message}</p>
             )}
           </div>
 
