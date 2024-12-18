@@ -73,7 +73,7 @@ function RelatedProducts({ productId }) {
               className="w-full h-48 object-cover mb-2 rounded"
             />
             <h3 className="text-lg font-semibold">{product.name}</h3>
-            <p className="text-primary font-bold">R$ {product.price.toFixed(2)}</p>
+            <p className="text-primary font-bold">$ {product.price.toFixed(2)}</p>
           </div>
         ))}
       </div>

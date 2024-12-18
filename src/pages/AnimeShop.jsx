@@ -39,40 +39,40 @@ function AnimeShop() {
   }, []); // Only fetch once when component mounts
 
   const filteredProducts = products
-    .filter(product => product.category !== 'Manga')
-    .filter(product => {
-      if (filters.priceRange) {
-        const [min, max] = filters.priceRange.split('-').map(Number);
-        if (max) {
-          return product.price >= min && product.price <= max;
-        } else {
-          return product.price >= min;
-        }
-      }
-      return true;
-    })
-    .filter(product => {
-      // Lógica corrigida para trabalhar com genre único
-      if (filters.genres?.length > 0) {
-        // Verifica se o gênero do produto está entre os selecionados
-        return filters.genres.includes(product.genre);
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      switch (filters.sortBy) {
-        case 'popular':
-          return (b.total_sold || 0) - (a.total_sold || 0);
-        case 'newest':
-          return new Date(b.created_at) - new Date(a.created_at);
-        case 'price-low':
-          return a.price - b.price;
-        case 'price-high':
-          return b.price - a.price;
-        default:
-          return 0;
-      }
-    });
+  .filter(product => product.category !== 'Manga')
+  .filter(product => {
+    if (filters.priceRange) {
+      const [min, max] = filters.priceRange.split('-').map(num => 
+        num === '+' ? Infinity : Number(num)
+      );
+      return product.price >= min && (max === Infinity ? true : product.price <= max);
+    }
+    return true;
+  })
+  .filter(product => {
+    // Updated logic for array-based genres
+    if (filters.genres?.length > 0) {
+      // Check if product has any of the selected genres
+      return filters.genres.some(genre => 
+        product.genres && product.genres.includes(genre)
+      );
+    }
+    return true;
+  })
+  .sort((a, b) => {
+    switch (filters.sortBy) {
+      case 'popular':
+        return (b.total_sold || 0) - (a.total_sold || 0);
+      case 'newest':
+        return new Date(b.created_at) - new Date(a.created_at);
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      default:
+        return 0;
+    }
+  });
 
   // Pagination logic
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);

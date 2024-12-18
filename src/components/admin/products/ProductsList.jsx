@@ -5,44 +5,37 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 function ProductsList({ onEdit }) {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Number of items per page
+  const itemsPerPage = 10;
 
-  // Function to fetch products from the API
   const fetchProducts = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/products');
-      setProducts(response.data); // Update state with the data from the API
+      console.log('API Response:', response.data);
+      setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
       alert('Unable to load products.');
     }
   };
 
-  // useEffect to load products on component mount
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Function to delete a product
   const handleDelete = async (productId) => {
-    // Adiciona o alerta de confirmação
     const confirmDelete = window.confirm("Tem certeza de que deseja apagar este produto?");
     
     if (!confirmDelete) {
-      return; // Se o usuário cancelar, a função termina aqui
+      return;
     }
   
     try {
-      // Adiciona o cabeçalho de autorização na requisição DELETE
       const headers = {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       };
   
-      // Realiza a requisição DELETE
       await axios.delete(`http://localhost:5000/api/products/${productId}`, { headers });
-  
-      // Atualiza a lista de produtos após uma exclusão bem-sucedida
-      fetchProducts(); // ou qualquer função que atualiza a lista de produtos
+      fetchProducts();
     } catch (error) {
       console.error('Error deleting product:', error);
   
@@ -54,12 +47,9 @@ function ProductsList({ onEdit }) {
     }
   };
 
-  // Calculate products for the current page
   const indexOfLastProduct = currentPage * itemsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
   const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
-
-  // Pagination handlers
   const totalPages = Math.ceil(products.length / itemsPerPage);
 
   const handlePageChange = (page) => {
@@ -81,7 +71,7 @@ function ProductsList({ onEdit }) {
               Category
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Genre
+              Genres
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Price
@@ -115,7 +105,20 @@ function ProductsList({ onEdit }) {
                 <div className="text-sm text-gray-500">{product.category}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-500">{product.genre}</div>
+                <div className="flex flex-wrap gap-1">
+                  {Array.isArray(product.genres) ? (
+                    product.genres.map((genre, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      >
+                        {genre}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm text-gray-500">No genres</span>
+                  )}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">${product.price}</div>
@@ -142,7 +145,6 @@ function ProductsList({ onEdit }) {
         </tbody>
       </table>
 
-      {/* Updated Pagination controls */}
       <div className="flex justify-center space-x-2 mt-4 mb-8">
         <button
           onClick={() => handlePageChange(currentPage - 1)}

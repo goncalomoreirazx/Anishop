@@ -259,27 +259,37 @@ const updateProduct = async (req, res) => {
 
 // Controlador para excluir um produto
 const deleteProduct = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const query = 'DELETE FROM products WHERE id = ?';
+    const { id } = req.params;
 
-    db.query(query, [id], (error, results) => {
+    // First check if the product exists
+    const checkQuery = 'SELECT * FROM products WHERE id = ?';
+    
+    db.query(checkQuery, [id], (error, results) => {
       if (error) {
-        console.error('Erro ao excluir o produto:', error);
-        return res.status(500).json({ message: 'Erro ao excluir o produto.' });
+        console.error('Error checking product:', error);
+        return res.status(500).json({ message: 'Error checking product.' });
       }
 
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ message: 'Produto não encontrado.' });
+      if (results.length === 0) {
+        return res.status(404).json({ message: 'Product not found.' });
       }
 
-      console.log('Produto excluído com sucesso:', results);
-      res.json({ message: 'Produto excluído com sucesso!' });
+      // If product exists, delete it
+      const deleteQuery = 'DELETE FROM products WHERE id = ?';
+      
+      db.query(deleteQuery, [id], (error) => {
+        if (error) {
+          console.error('Error deleting product:', error);
+          return res.status(500).json({ message: 'Error deleting product.' });
+        }
+
+        res.json({ message: 'Product deleted successfully.' });
+      });
     });
   } catch (error) {
-    console.error('Erro ao excluir o produto:', error);
-    res.status(500).json({ message: 'Erro ao excluir o produto.' });
+    console.error('Error in delete product:', error);
+    res.status(500).json({ message: 'Server error while deleting product.' });
   }
 };
 

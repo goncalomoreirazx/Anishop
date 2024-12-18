@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
+
 function FilterSidebar({ filters, onFilterChange, shopType }) {
-  // Lista base de gêneros
   const baseGenres = [
     'Action',
     'Adventure',
@@ -15,12 +16,10 @@ function FilterSidebar({ filters, onFilterChange, shopType }) {
     'Other'
   ];
 
-  // Adiciona 'Anime' apenas se for a animeShop
   const genres = shopType === 'anime' 
     ? [...baseGenres, 'Anime']
     : baseGenres;
 
-  // Função para resetar todos os filtros
   const handleReset = () => {
     onFilterChange('priceRange', '');
     onFilterChange('genres', []);
@@ -39,7 +38,6 @@ function FilterSidebar({ filters, onFilterChange, shopType }) {
         </button>
       </div>
       
-      {/* Price Range */}
       <div className="mb-6">
         <h4 className="font-medium mb-2">Price Range</h4>
         <select
@@ -55,7 +53,6 @@ function FilterSidebar({ filters, onFilterChange, shopType }) {
         </select>
       </div>
 
-      {/* Genre */}
       <div className="mb-6">
         <h4 className="font-medium mb-2">Genres</h4>
         <div className="space-y-2">
@@ -78,7 +75,6 @@ function FilterSidebar({ filters, onFilterChange, shopType }) {
         </div>
       </div>
 
-      {/* Sort By */}
       <div className="mb-6">
         <h4 className="font-medium mb-2">Sort By</h4>
         <select
@@ -91,6 +87,103 @@ function FilterSidebar({ filters, onFilterChange, shopType }) {
           <option value="price-low">Price: Low to High</option>
           <option value="price-high">Price: High to Low</option>
         </select>
+      </div>
+    </div>
+  );
+}
+
+// Shop.jsx (or wherever you're handling the products)
+function Shop() {
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [filters, setFilters] = useState({
+    priceRange: '',
+    genres: [],
+    sortBy: 'popular'
+  });
+
+  // Fetch products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/products');
+        setProducts(response.data);
+        setFilteredProducts(response.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Apply filters
+  useEffect(() => {
+    let filtered = [...products];
+
+    // Filter by price range
+    if (filters.priceRange) {
+      const [min, max] = filters.priceRange.split('-').map(num => 
+        num === '+' ? Infinity : Number(num)
+      );
+      filtered = filtered.filter(product => 
+        product.price >= min && (max === Infinity ? true : product.price <= max)
+      );
+    }
+
+    // Filter by genres
+    if (filters.genres.length > 0) {
+      filtered = filtered.filter(product => {
+        // Check if product has any of the selected genres
+        return filters.genres.some(genre => 
+          product.genres && product.genres.includes(genre)
+        );
+      });
+    }
+
+    // Sort products
+    switch (filters.sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        break;
+      // Add more sorting options as needed
+      default:
+        // 'popular' or default sorting
+        break;
+    }
+
+    setFilteredProducts(filtered);
+  }, [filters, products]);
+
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      [filterName]: value
+    }));
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex gap-6">
+        <div className="w-64 flex-shrink-0">
+          <FilterSidebar
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            shopType="anime"
+          />
+        </div>
+        <div className="flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -57,7 +57,7 @@ function TopProducts() {
                 <tr key={index}>
                   <td className="py-4 text-sm text-gray-900">{product.name}</td>
                   <td className="py-4 text-sm text-gray-900">{product.total_sold} units</td>
-                  <td className="py-4 text-sm text-gray-900">R$ {product.total_revenue}</td>
+                  <td className="py-4 text-sm text-gray-900">$ {product.total_revenue}</td>
                 </tr>
               ))}
             </tbody>

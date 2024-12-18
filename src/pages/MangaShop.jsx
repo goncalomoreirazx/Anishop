@@ -41,20 +41,20 @@ function MangaShop() {
     .filter(product => product.category === 'Manga')
     .filter(product => {
       if (filters.priceRange) {
-        const [min, max] = filters.priceRange.split('-').map(Number);
-        if (max) {
-          return product.price >= min && product.price <= max;
-        } else {
-          return product.price >= min;
-        }
+        const [min, max] = filters.priceRange.split('-').map(num => 
+          num === '+' ? Infinity : Number(num)
+        );
+        return product.price >= min && (max === Infinity ? true : product.price <= max);
       }
       return true;
     })
     .filter(product => {
-      // Lógica corrigida para trabalhar com genre único
+      // Updated logic for array-based genres
       if (filters.genres?.length > 0) {
-        // Verifica se o gênero do produto está entre os selecionados
-        return filters.genres.includes(product.genre);
+        // Check if product has any of the selected genres
+        return filters.genres.some(genre => 
+          product.genres && product.genres.includes(genre)
+        );
       }
       return true;
     })
