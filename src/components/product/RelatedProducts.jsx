@@ -53,33 +53,51 @@ function RelatedProducts({ productId }) {
     window.location.reload();
   };
 
-  if (loading) return <div>Carregando produtos relacionados...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return (
+    <div className="mt-16">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
+      <div className="grid grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-gray-100 animate-pulse h-64 rounded-xl"></div>
+        ))}
+      </div>
+    </div>
+  );
+  
+  if (error) return null;
   if (relatedProducts.length === 0) return null;
 
   return (
-    <div className="mt-8">
-      <h2 className="text-2xl font-bold mb-4">Produtos Relacionados</h2>
-      <div className="grid grid-cols-4 gap-4">
+    <div className="mt-16">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
         {relatedProducts.map((product) => (
           <div 
             key={product.id} 
-            className="border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-shadow"
+            className="bg-white rounded-xl shadow-card overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-hover hover:-translate-y-1"
             onClick={() => handleProductClick(product.id)}
           >
-            <img 
-              src={product.image_url} 
-              alt={product.name} 
-              className="w-full h-48 object-cover mb-2 rounded"
-            />
-            <h3 className="text-lg font-semibold">{product.name}</h3>
-            <p className="text-primary font-bold">$ {product.price.toFixed(2)}</p>
+            {/* Product image */}
+            <div className="h-48 overflow-hidden">
+              <img 
+                src={product.image_url} 
+                alt={product.name} 
+                className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+            
+            {/* Product details */}
+            <div className="p-4">
+              <h3 className="text-gray-900 font-medium line-clamp-1">{product.name}</h3>
+              <p className="text-primary font-bold mt-2">$ {product.price.toFixed(2)}</p>
+            </div>
           </div>
         ))}
       </div>
     </div>
   );
 }
+
 
 RelatedProducts.propTypes = {
   productId: PropTypes.number.isRequired

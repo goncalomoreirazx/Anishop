@@ -86,66 +86,91 @@ function AnimeShop() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-dark mb-8">Anime Shop</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Anime Shop</h1>
       <div className="flex flex-col md:flex-row gap-8">
+        {/* Sidebar */}
         <div className="w-full md:w-64">
           <FilterSidebar 
-          filters={filters} 
-          onFilterChange={handleFilterChange} 
-          shopType="anime" />
+            filters={filters} 
+            onFilterChange={handleFilterChange} 
+            shopType="anime" />
         </div>
+
+        {/* Product grid */}
         <div className="flex-1">
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <span className="text-lg">Loading...</span>
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentProducts.map(product => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              {currentProducts.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {currentProducts.map(product => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
 
-              {totalPages > 1 && (
-                <div className="flex justify-center space-x-2 mt-8 mb-4">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded ${
-                      currentPage === 1 
-                        ? 'bg-gray-300 cursor-not-allowed' 
-                        : 'bg-primary text-white hover:bg-opacity-90'
-                    }`}
+                  {/* Pagination with improved styling */}
+                  {totalPages > 1 && (
+                    <div className="flex justify-center space-x-2 mt-12 mb-4">
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className={`px-4 py-2 rounded-md shadow ${
+                          currentPage === 1 
+                            ? 'bg-gray-300 cursor-not-allowed' 
+                            : 'bg-primary text-white hover:bg-opacity-90'
+                        }`}
+                      >
+                        Previous
+                      </button>
+                      
+                      {[...Array(totalPages)].map((_, index) => (
+                        <button
+                          key={index + 1}
+                          onClick={() => handlePageChange(index + 1)}
+                          className={`w-10 h-10 flex items-center justify-center rounded-md shadow ${
+                            currentPage === index + 1
+                              ? 'bg-primary text-white'
+                              : 'bg-white hover:bg-gray-100'
+                          }`}
+                        >
+                          {index + 1}
+                        </button>
+                      ))}
+                      
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className={`px-4 py-2 rounded-md shadow ${
+                          currentPage === totalPages 
+                            ? 'bg-gray-300 cursor-not-allowed' 
+                            : 'bg-primary text-white hover:bg-opacity-90'
+                        }`}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* Empty state for no products */
+                <div className="text-center py-16 bg-gray-50 rounded-xl">
+                  <div className="w-24 h-24 mx-auto mb-6 text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900">No products found</h3>
+                  <p className="text-gray-500 mt-2">Try adjusting your filters or check back later.</p>
+                  <button 
+                    onClick={() => handleFilterChange('genres', [])} 
+                    className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90 transition-colors"
                   >
-                    Previous
-                  </button>
-                  
-                  {[...Array(totalPages)].map((_, index) => (
-                    <button
-                      key={index + 1}
-                      onClick={() => handlePageChange(index + 1)}
-                      className={`px-4 py-2 rounded ${
-                        currentPage === index + 1
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-200 hover:bg-gray-300'
-                      }`}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                  
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded ${
-                      currentPage === totalPages 
-                        ? 'bg-gray-300 cursor-not-allowed' 
-                        : 'bg-primary text-white hover:bg-opacity-90'
-                    }`}
-                  >
-                    Next
+                    Clear Filters
                   </button>
                 </div>
               )}

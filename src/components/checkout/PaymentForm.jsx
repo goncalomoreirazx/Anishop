@@ -1,11 +1,11 @@
 function PaymentForm({ register, errors }) {
   return (
-    <div className="space-y-4 mt-8">
-      <h3 className="text-lg font-medium text-gray-900">Payment Details</h3>
-      <div className="grid grid-cols-1 gap-4">
+    <div className="space-y-6">
+      <h3 className="text-lg font-medium text-gray-900 pb-3 border-b border-gray-200">Payment Details</h3>
+      <div className="space-y-6">
         {/* Card Number */}
         <div>
-          <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">
             Card Number
           </label>
           <input
@@ -13,7 +13,7 @@ function PaymentForm({ register, errors }) {
             type="text"
             {...register('cardNumber', { required: "Card number is required" })}
             placeholder="**** **** **** ****"
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
             aria-describedby="cardNumberError"
           />
           {errors.cardNumber && (
@@ -23,10 +23,10 @@ function PaymentForm({ register, errors }) {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Expiry Date */}
           <div>
-            <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">
               Expiry Date
             </label>
             <input
@@ -34,7 +34,7 @@ function PaymentForm({ register, errors }) {
               type="text"
               {...register('expiryDate', { required: "Expiry date is required" })}
               placeholder="MM/YY"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
               aria-describedby="expiryDateError"
             />
             {errors.expiryDate && (
@@ -46,7 +46,7 @@ function PaymentForm({ register, errors }) {
 
           {/* CVV */}
           <div>
-            <label htmlFor="cvv" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
               CVV
             </label>
             <input
@@ -54,7 +54,7 @@ function PaymentForm({ register, errors }) {
               type="text"
               {...register('cvv', { required: "CVV is required" })}
               placeholder="***"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
               aria-describedby="cvvError"
             />
             {errors.cvv && (

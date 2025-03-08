@@ -54,13 +54,18 @@ function Register() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-bold text-dark">
-          Create your account
-        </h2>
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
+            Create your account
+          </h2>
+          <p className="text-gray-600">
+            Join our community of anime and manga fans
+          </p>
+        </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white py-8 px-4 shadow-card sm:rounded-xl sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700">
@@ -133,7 +138,7 @@ function Register() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-md text-white bg-gradient-to-r from-primary to-purple-800 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary font-medium"
               >
                 Create Account
               </button>
@@ -155,7 +160,7 @@ function Register() {
             <div className="mt-6">
               <Link
                 to="/login"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary bg-white border-primary hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                className="w-full flex justify-center py-3 px-4 border border-primary rounded-md shadow-sm text-sm font-medium text-primary bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 Sign in instead
               </Link>

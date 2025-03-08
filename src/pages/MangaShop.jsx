@@ -87,31 +87,35 @@ function MangaShop() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold text-dark mb-8">Manga Shop</h1>
       <div className="flex flex-col md:flex-row gap-8">
+        {/* Sidebar */}
         <div className="w-full md:w-64">
-        <FilterSidebar 
-          filters={filters} 
-          onFilterChange={handleFilterChange} 
-          shopType="manga" />
+          <FilterSidebar 
+            filters={filters} 
+            onFilterChange={handleFilterChange} 
+            shopType="manga" />
         </div>
+
+        {/* Product grid */}
         <div className="flex-1">
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <span className="text-lg">Loading...</span>
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {currentProducts.map(product => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
 
+              {/* Pagination with improved styling */}
               {totalPages > 1 && (
-                <div className="flex justify-center space-x-2 mt-8 mb-4">
+                <div className="flex justify-center space-x-2 mt-12 mb-4">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded ${
+                    className={`px-4 py-2 rounded-md shadow ${
                       currentPage === 1 
                         ? 'bg-gray-300 cursor-not-allowed' 
                         : 'bg-primary text-white hover:bg-opacity-90'
@@ -124,10 +128,10 @@ function MangaShop() {
                     <button
                       key={index + 1}
                       onClick={() => handlePageChange(index + 1)}
-                      className={`px-4 py-2 rounded ${
+                      className={`w-10 h-10 flex items-center justify-center rounded-md shadow ${
                         currentPage === index + 1
                           ? 'bg-primary text-white'
-                          : 'bg-gray-200 hover:bg-gray-300'
+                          : 'bg-white hover:bg-gray-100'
                       }`}
                     >
                       {index + 1}
@@ -137,7 +141,7 @@ function MangaShop() {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded ${
+                    className={`px-4 py-2 rounded-md shadow ${
                       currentPage === totalPages 
                         ? 'bg-gray-300 cursor-not-allowed' 
                         : 'bg-primary text-white hover:bg-opacity-90'
@@ -145,6 +149,15 @@ function MangaShop() {
                   >
                     Next
                   </button>
+                </div>
+              )}
+              
+              {/* Empty state */}
+              {currentProducts.length === 0 && (
+                <div className="text-center py-16 bg-gray-50 rounded-xl">
+                  <img src="/no-results.svg" alt="No products found" className="w-32 h-32 mx-auto mb-4 opacity-60" />
+                  <h3 className="text-lg font-medium text-gray-900">No products found</h3>
+                  <p className="text-gray-500 mt-2">Try adjusting your filters or check back later.</p>
                 </div>
               )}
             </>

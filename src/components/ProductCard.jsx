@@ -9,28 +9,28 @@ function ProductCard({ product }) {
   };
 
   return (
-    <div 
-      className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 cursor-pointer"
-    >
+    <div className="bg-white rounded-xl shadow-card overflow-hidden transition-all duration-300 hover:shadow-hover hover:-translate-y-1 cursor-pointer">
+    <div className="h-72 overflow-hidden">
       <img 
         src={`http://localhost:5000/assets/images/${product.image_url}`}
         alt={product.name}
-        className="w-full h-72 object-cover mt-1"
+        className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
       />
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-dark mt-1">{product.name}</h3>
-        <div className="mt-4 flex items-center justify-between">
-          <span className="text-primary font-bold">${product.price}</span>
-          <button 
-            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
-            onClick={handleSeeDetails}
-          >
-            See Details
-          </button>
-        </div>
+    </div>
+    <div className="p-5">
+      <h3 className="text-lg font-semibold text-dark mt-1 line-clamp-1">{product.name}</h3>
+      <div className="mt-4 flex items-center justify-between">
+        <span className="text-primary font-bold text-xl">${product.price}</span>
+        <button 
+          className="bg-gradient-to-r from-primary to-purple-600 text-white px-4 py-2 rounded-md hover:opacity-90 transition-all duration-300 shadow-md"
+          onClick={handleSeeDetails}
+        >
+          See Details
+        </button>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default ProductCard;

@@ -27,21 +27,23 @@ function FilterSidebar({ filters, onFilterChange, shopType }) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Filters</h3>
+    <div className="bg-white p-6 rounded-xl shadow-card sticky top-24">
+      {/* Header and reset button */}
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-semibold text-dark">Filters</h3>
         <button
           onClick={handleReset}
-          className="px-3 py-1 text-sm text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors"
+          className="px-3 py-1 text-sm text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors shadow"
         >
           Reset Filters
         </button>
       </div>
       
-      <div className="mb-6">
-        <h4 className="font-medium mb-2">Price Range</h4>
+      {/* Price Range filter */}
+      <div className="mb-8">
+        <h4 className="font-medium mb-3 text-dark">Price Range</h4>
         <select
-          className="w-full p-2 border rounded-md"
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
           onChange={(e) => onFilterChange('priceRange', e.target.value)}
           value={filters.priceRange}
         >
@@ -53,14 +55,15 @@ function FilterSidebar({ filters, onFilterChange, shopType }) {
         </select>
       </div>
 
-      <div className="mb-6">
-        <h4 className="font-medium mb-2">Genres</h4>
-        <div className="space-y-2">
+      {/* Genres filter */}
+      <div className="mb-8">
+        <h4 className="font-medium mb-3 text-dark">Genres</h4>
+        <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
           {genres.map(genre => (
-            <label key={genre} className="flex items-center">
+            <label key={genre} className="flex items-center p-2 hover:bg-gray-50 rounded">
               <input
                 type="checkbox"
-                className="form-checkbox text-primary"
+                className="form-checkbox h-5 w-5 text-primary rounded border-gray-300 focus:ring-primary"
                 checked={filters.genres?.includes(genre)}
                 onChange={(e) => {
                   const newGenres = e.target.checked
@@ -69,16 +72,17 @@ function FilterSidebar({ filters, onFilterChange, shopType }) {
                   onFilterChange('genres', newGenres);
                 }}
               />
-              <span className="ml-2">{genre}</span>
+              <span className="ml-2 text-gray-700">{genre}</span>
             </label>
           ))}
         </div>
       </div>
 
+      {/* Sort filter */}
       <div className="mb-6">
-        <h4 className="font-medium mb-2">Sort By</h4>
+        <h4 className="font-medium mb-3 text-dark">Sort By</h4>
         <select
-          className="w-full p-2 border rounded-md"
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
           onChange={(e) => onFilterChange('sortBy', e.target.value)}
           value={filters.sortBy}
         >
@@ -91,6 +95,7 @@ function FilterSidebar({ filters, onFilterChange, shopType }) {
     </div>
   );
 }
+
 
 // Shop.jsx (or wherever you're handling the products)
 function Shop() {

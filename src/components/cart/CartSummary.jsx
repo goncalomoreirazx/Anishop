@@ -4,21 +4,21 @@ function CartSummary({ items }) {
   const total = subtotal + shipping;
 
   return (
-    <div className="bg-gray-50 p-6 rounded-lg">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
-      <div className="space-y-2">
-        <div className="flex justify-between">
+    <div className="bg-gray-50 p-6 rounded-xl shadow-card">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">Order Summary</h3>
+      <div className="space-y-3">
+        <div className="flex justify-between text-gray-600">
           <span>Subtotal</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span className="font-medium">${subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between text-gray-600">
           <span>Shipping</span>
-          <span>${shipping.toFixed(2)}</span>
+          <span className="font-medium">${shipping.toFixed(2)}</span>
         </div>
-        <div className="border-t border-gray-200 pt-2 mt-2">
-          <div className="flex justify-between font-medium">
+        <div className="border-t border-gray-200 pt-3 mt-3">
+          <div className="flex justify-between font-semibold text-lg">
             <span>Total</span>
-            <span>${total.toFixed(2)}</span>
+            <span className="text-primary">${total.toFixed(2)}</span>
           </div>
         </div>
       </div>

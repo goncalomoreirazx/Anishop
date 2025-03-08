@@ -106,30 +106,94 @@ function Checkout() {
   };
   
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-8">
-          {/* Formulário de Endereço */}
-          <AddressForm register={register} errors={errors} />
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="md:col-span-2 space-y-10">
+          {/* Checkout steps with visual indicators */}
+          <div className="flex mb-8">
+            <div className="flex-1 text-center">
+              <div className="w-10 h-10 mx-auto bg-primary text-white rounded-full flex items-center justify-center font-semibold">1</div>
+              <div className="mt-2 text-sm font-medium">Shipping</div>
+            </div>
+            <div className="w-full flex items-center">
+              <div className="h-1 w-full bg-primary"></div>
+            </div>
+            <div className="flex-1 text-center">
+              <div className="w-10 h-10 mx-auto bg-primary text-white rounded-full flex items-center justify-center font-semibold">2</div>
+              <div className="mt-2 text-sm font-medium">Payment</div>
+            </div>
+            <div className="w-full flex items-center">
+              <div className="h-1 w-full bg-gray-300"></div>
+            </div>
+            <div className="flex-1 text-center">
+              <div className="w-10 h-10 mx-auto bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-semibold">3</div>
+              <div className="mt-2 text-sm font-medium text-gray-500">Confirmation</div>
+            </div>
+          </div>
 
-          {/* Formulário de Pagamento */}
-          <PaymentForm register={register} errors={errors} />
+          {/* Shipping address form */}
+          <div className="bg-white p-8 rounded-xl shadow-card">
+            <AddressForm register={register} errors={errors} />
+          </div>
+
+          {/* Payment form */}
+          <div className="bg-white p-8 rounded-xl shadow-card">
+            <PaymentForm register={register} errors={errors} />
+          </div>
         </div>
+
+        {/* Order summary */}
         <div>
-          <h3 className="text-xl font-semibold">Order Summary</h3>
+          <div className="bg-white p-6 rounded-xl shadow-card sticky top-24">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">Order Summary</h3>
 
-          {/* Resumo do Carrinho */}
-          <CartSummary items={cartItems} />
+            {/* Cart items summary */}
+            <div className="mb-6 space-y-4">
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex items-center border-b border-gray-100 pb-4 last:border-0">
+                  <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                    <img
+                      src={`http://localhost:5000/assets/images/${item.mainImage}`}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="ml-4 flex-1">
+                    <h4 className="text-sm font-medium">{item.name}</h4>
+                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                  </div>
+                  <div className="text-sm font-medium">${(item.price * item.quantity).toFixed(2)}</div>
+                </div>
+              ))}
+            </div>
 
-          {/* Botão de Confirmação de Compra */}
-          <button
-            type="submit"
-            disabled={loading || Object.keys(errors).length > 0}  // Desativa o botão se houver erros no formulário ou se estiver carregando
-            className="mt-4 w-full bg-primary text-white px-6 py-3 rounded-md hover:bg-opacity-90 transition-colors"
-          >
-            {loading ? 'Processing...' : 'Confirm Purchase'}
-          </button>
+            {/* Price calculations */}
+            <CartSummary items={cartItems} />
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={loading || Object.keys(errors).length > 0}
+              className={`mt-6 w-full py-4 rounded-md font-medium ${
+                loading || Object.keys(errors).length > 0
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-primary to-purple-800 text-white hover:opacity-90 transition-all shadow-lg'
+              }`}
+            >
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                'Confirm Purchase'
+              )}
+            </button>
+          </div>
         </div>
       </form>
     </div>

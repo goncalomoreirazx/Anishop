@@ -29,9 +29,7 @@ function Home() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="spinner-border" role="status">
-          <span className="sr-only">Carregando...</span>
-        </div>
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -39,7 +37,10 @@ function Home() {
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-red-500">{error}</p>
+        <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg max-w-md">
+          <p className="font-medium">{error}</p>
+          <p className="text-sm mt-2">Please try refreshing the page or check back later.</p>
+        </div>
       </div>
     );
   }
@@ -47,9 +48,12 @@ function Home() {
   return (
     <div>
       <Hero />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-dark mb-8">Produtos em Destaque</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-dark mb-4">Featured Products</h2>
+          <div className="w-24 h-1 bg-primary mx-auto mb-6 rounded-full"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {featuredProducts.map(product => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -59,5 +63,6 @@ function Home() {
     </div>
   );
 }
+
 
 export default Home;
