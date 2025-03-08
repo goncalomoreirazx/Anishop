@@ -70,9 +70,17 @@ function AddProductImageModal({ isOpen, onClose, onImageAdded }) {
     setError(null);
     
     try {
+      // Get the token from localStorage - THIS IS THE MISSING PART
+      const token = localStorage.getItem('token');
+      
       await axios.post('http://localhost:5000/api/products/images', {
         product_id: selectedProduct,
         image_url: selectedImage
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`, // Add the token to the headers
+          'Content-Type': 'application/json'
+        }
       });
       
       setSuccess(true);
@@ -88,7 +96,7 @@ function AddProductImageModal({ isOpen, onClose, onImageAdded }) {
     } finally {
       setLoading(false);
     }
-  };
+};
 
   // If modal is not open, don't render anything
   if (!isOpen) return null;
