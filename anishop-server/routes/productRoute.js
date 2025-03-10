@@ -10,7 +10,9 @@ const {
   addProductReview,
   getRelatedProducts,
   addProductImage,
-  getFilteredProducts
+  getFilteredProducts,
+  applyDiscount,  // New controller for discounts
+  removeDiscounts // New controller to remove discounts
 } = require('../controllers/productController');
 const authMiddleware = require ('../middleware/authMiddleware');
 const isAdmin = require('../middleware/isAdmin');
@@ -29,5 +31,9 @@ router.post('/reviews', authMiddleware, addProductReview); // so users logados
 router.get('/:productId/related', getRelatedProducts); //qualquer 1 ve
 router.post('/images', isAdmin, addProductImage); //admin
 router.get('/filter', getFilteredProducts); //qualquer pessoa ve
+
+// New routes for discounts
+router.post('/discounts/apply', isAdmin, applyDiscount); //admin
+router.post('/discounts/remove', isAdmin, removeDiscounts); //admin
 
 module.exports = router;

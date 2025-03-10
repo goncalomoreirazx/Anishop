@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { FaTimes, FaSave, FaTimesCircle } from 'react-icons/fa';
+import { FaTimes, FaSave, FaTimesCircle, FaPercent } from 'react-icons/fa';
 import axios from 'axios';
 import Select from 'react-select';
 
@@ -56,7 +56,8 @@ function ProductModal({ isOpen, onClose, product, refreshProducts }) {
       reset({
         ...product,
         genres: formattedGenres,
-        category: formattedCategory
+        category: formattedCategory,
+        discount_percentage: product.discount_percentage || 0
       });
     } else {
       reset({
@@ -66,7 +67,8 @@ function ProductModal({ isOpen, onClose, product, refreshProducts }) {
         category: null,
         genres: [],
         stock: '',
-        image_url: ''
+        image_url: '',
+        discount_percentage: 0
       });
     }
     
@@ -88,7 +90,8 @@ function ProductModal({ isOpen, onClose, product, refreshProducts }) {
         category: data.category.value,
         genres: data.genres.map(genre => genre.value),
         price: parseFloat(data.price),
-        stock: parseInt(data.stock, 10)
+        stock: parseInt(data.stock, 10),
+        discount_percentage: parseFloat(data.discount_percentage || 0)
       };
       
       if (product) {
@@ -226,8 +229,8 @@ function ProductModal({ isOpen, onClose, product, refreshProducts }) {
               )}
             </div>
             
-            {/* Price and Stock fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Price, Stock, and Discount fields */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Price ($)
@@ -267,6 +270,29 @@ function ProductModal({ isOpen, onClose, product, refreshProducts }) {
                 />
                 {errors.stock && (
                   <p className="mt-1 text-sm text-red-600">{errors.stock.message}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  Discount (%)
+                  <FaPercent className="ml-1 text-gray-400 h-3 w-3" />
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  {...register('discount_percentage', { 
+                    min: { value: 0, message: 'Discount must be non-negative' },
+                    max: { value: 100, message: 'Discount cannot exceed 100%' },
+                    valueAsNumber: true
+                  })}
+                  className={`mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                    errors.discount_percentage ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                />
+                {errors.discount_percentage && (
+                  <p className="mt-1 text-sm text-red-600">{errors.discount_percentage.message}</p>
                 )}
               </div>
             </div>

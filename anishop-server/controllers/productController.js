@@ -19,7 +19,11 @@ const getAllProducts = async (req, res) => {
       // Converter a string de gêneros em array
       const productsWithGenres = results.map(product => ({
         ...product,
-        genres: product.genres ? product.genres.split(',') : []
+        genres: product.genres ? product.genres.split(',') : [],
+        // Calculate discounted price if discount is present
+        final_price: product.discount_percentage > 0 
+          ? parseFloat((product.price * (1 - product.discount_percentage / 100)).toFixed(2)) 
+          : product.price
       }));
       
       res.json(productsWithGenres);
@@ -44,6 +48,7 @@ const getProductById = async (req, res) => {
         p.category,
         p.stock, 
         p.image_url AS mainImage,
+        p.discount_percentage,
         GROUP_CONCAT(DISTINCT pg.genre) as genres,
         GROUP_CONCAT(DISTINCT pi.image_url) as additionalImages
       FROM products p
@@ -72,6 +77,10 @@ const getProductById = async (req, res) => {
         category: results[0].category,
         stock: results[0].stock,
         mainImage: results[0].mainImage,
+        discount_percentage: results[0].discount_percentage || 0,
+        final_price: results[0].discount_percentage > 0 
+          ? parseFloat((results[0].price * (1 - results[0].discount_percentage / 100)).toFixed(2)) 
+          : results[0].price,
         genres: results[0].genres ? results[0].genres.split(',') : [],
         images: results[0].additionalImages ? results[0].additionalImages.split(',') : []
       };
@@ -84,10 +93,56 @@ const getProductById = async (req, res) => {
   }
 };
 
+// New controller to apply discounts to products
+const applyDiscount = async (req, res) => {
+  try {
+    const { productIds, discountPercentage } = req.body;
+    
+    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+      return res.status(400).json({ message: 'You must select at least one product.' });
+    }
+    
+    if (discountPercentage === undefined || isNaN(discountPercentage)) {
+      return res.status(400).json({ message: 'You must provide a valid discount percentage.' });
+    }
+    
+    // Validate discount percentage is between 0 and 100
+    const percentage = parseFloat(discountPercentage);
+    if (percentage < 0 || percentage > 100) {
+      return res.status(400).json({ message: 'Discount percentage must be between 0 and 100.' });
+    }
+    
+    // Create placeholders for the products IDs for the SQL query
+    const placeholders = productIds.map(() => '?').join(',');
+    
+    // Update products with the discount
+    const query = `
+      UPDATE products 
+      SET discount_percentage = ? 
+      WHERE id IN (${placeholders})
+    `;
+    
+    db.query(query, [percentage, ...productIds], (error, results) => {
+      if (error) {
+        console.error('Error applying discount:', error);
+        return res.status(500).json({ message: 'Error applying discount.' });
+      }
+      
+      res.json({ 
+        message: 'Discount applied successfully!',
+        affectedProducts: results.affectedRows
+      });
+    });
+  } catch (error) {
+    console.error('Error applying discount:', error);
+    res.status(500).json({ message: 'Server error while applying discount.' });
+  }
+};
+
 // Controlador para adicionar um produto
 const addProduct = async (req, res) => {
   try {
-    const { name, description, price, category, genres, stock, image_url } = req.body;
+    const { name, description, price, category, genres, stock, image_url, discount_percentage = 0 } = req.body;
     
     console.log('Dados recebidos:', req.body);
     
@@ -104,6 +159,7 @@ const addProduct = async (req, res) => {
     // Converta para números
     const priceNumeric = parseFloat(price);
     const stockNumeric = parseInt(stock, 10);
+    const discountNumeric = parseFloat(discount_percentage) || 0;
     
     // Usar transação para garantir que tanto o produto quanto seus gêneros sejam salvos
     db.beginTransaction(async (err) => {
@@ -112,10 +168,10 @@ const addProduct = async (req, res) => {
       try {
         // Primeiro, insere o produto
         const insertProductQuery = `
-          INSERT INTO products (name, description, price, category, stock, image_url)
-          VALUES (?, ?, ?, ?, ?, ?)
+          INSERT INTO products (name, description, price, category, stock, image_url, discount_percentage)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
-        const productValues = [name, description, priceNumeric, category, stockNumeric, image_url];
+        const productValues = [name, description, priceNumeric, category, stockNumeric, image_url, discountNumeric];
         
         db.query(insertProductQuery, productValues, async (error, results) => {
           if (error) {
@@ -166,7 +222,7 @@ const addProduct = async (req, res) => {
 // Controlador para atualizar um produto
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, category, genres, stock, image_url } = req.body;
+  const { name, description, price, category, genres, stock, image_url, discount_percentage } = req.body;
 
   try {
     db.beginTransaction(async (err) => {
@@ -200,6 +256,10 @@ const updateProduct = async (req, res) => {
         if (image_url) {
           fields.push('image_url = ?');
           values.push(image_url);
+        }
+        if (discount_percentage !== undefined) {
+          fields.push('discount_percentage = ?');
+          values.push(discount_percentage);
         }
         
         if (fields.length > 0) {
@@ -257,7 +317,7 @@ const updateProduct = async (req, res) => {
   }
 };
 
-// Controlador para excluir um produto
+// Rest of your controller functions
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -334,6 +394,7 @@ const getMostSoldProducts = (req, res) => {
       p.description,
       p.price,
       p.image_url,
+      p.discount_percentage,
       SUM(oi.quantity) as total_sold,
       SUM(oi.quantity * oi.price) as total_revenue
     FROM 
@@ -341,7 +402,7 @@ const getMostSoldProducts = (req, res) => {
     JOIN 
       order_items oi ON p.id = oi.product_id
     GROUP BY 
-      p.id, p.name, p.description, p.price, p.image_url
+      p.id, p.name, p.description, p.price, p.image_url, p.discount_percentage
     ORDER BY 
       total_sold DESC
     LIMIT 4
@@ -355,11 +416,21 @@ const getMostSoldProducts = (req, res) => {
 
     if (Array.isArray(results)) {
       // Formata os resultados para melhor apresentação
-      const formattedResults = results.map(product => ({
-        ...product,
-        total_sold: parseInt(product.total_sold),
-        total_revenue: parseFloat(product.total_revenue).toFixed(2)
-      }));
+      const formattedResults = results.map(product => {
+        const hasDiscount = product.discount_percentage > 0;
+        const finalPrice = hasDiscount 
+          ? parseFloat((product.price * (1 - product.discount_percentage / 100)).toFixed(2))
+          : product.price;
+          
+        return {
+          ...product,
+          total_sold: parseInt(product.total_sold),
+          total_revenue: parseFloat(product.total_revenue).toFixed(2),
+          final_price: finalPrice,
+          has_discount: hasDiscount
+        };
+      });
+      
       return res.status(200).json(formattedResults);
     } else {
       console.error('O resultado da query não é iterável:', results);
@@ -507,7 +578,8 @@ const getRelatedProducts = (req, res) => {
         name, 
         price, 
         image_url, 
-        category
+        category,
+        discount_percentage
       FROM products
       WHERE 
         category = ? 
@@ -533,11 +605,20 @@ const getRelatedProducts = (req, res) => {
           return res.status(200).json([]);
         }
 
-        // Map results to include full image URL
-        const relatedProducts = results.map(product => ({
-          ...product,
-          image_url: `http://localhost:5000/assets/images/${product.image_url}`
-        }));
+        // Map results to include full image URL and final price
+        const relatedProducts = results.map(product => {
+          const hasDiscount = product.discount_percentage > 0;
+          const finalPrice = hasDiscount 
+            ? parseFloat((product.price * (1 - product.discount_percentage / 100)).toFixed(2))
+            : product.price;
+            
+          return {
+            ...product,
+            image_url: `http://localhost:5000/assets/images/${product.image_url}`,
+            final_price: finalPrice,
+            has_discount: hasDiscount
+          };
+        });
 
         res.status(200).json(relatedProducts);
       }
@@ -545,7 +626,7 @@ const getRelatedProducts = (req, res) => {
   });
 };
 
-///controller para os filtros.
+// Controller para produtos filtrados
 const getFilteredProducts = (req, res) => {
   const { priceRange, categories, sortBy } = req.query;
 
@@ -613,14 +694,72 @@ const getFilteredProducts = (req, res) => {
       return res.status(500).json({ error: 'Error fetching filtered products' });
     }
 
-    const formattedResults = results.map(product => ({
-      ...product,
-      total_sold: parseInt(product.total_sold)
-    }));
+    const formattedResults = results.map(product => {
+      const hasDiscount = product.discount_percentage > 0;
+      const finalPrice = hasDiscount 
+        ? parseFloat((product.price * (1 - product.discount_percentage / 100)).toFixed(2))
+        : product.price;
+        
+      return {
+        ...product,
+        total_sold: parseInt(product.total_sold),
+        final_price: finalPrice,
+        has_discount: hasDiscount
+      };
+    });
 
     res.json(formattedResults);
   });
 };
 
+// Remove discounts from products
+const removeDiscounts = async (req, res) => {
+  try {
+    const { productIds } = req.body;
+    
+    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+      return res.status(400).json({ message: 'You must select at least one product.' });
+    }
+    
+    // Create placeholders for the products IDs for the SQL query
+    const placeholders = productIds.map(() => '?').join(',');
+    
+    // Update products to remove discounts
+    const query = `
+      UPDATE products 
+      SET discount_percentage = 0 
+      WHERE id IN (${placeholders})
+    `;
+    
+    db.query(query, [...productIds], (error, results) => {
+      if (error) {
+        console.error('Error removing discounts:', error);
+        return res.status(500).json({ message: 'Error removing discounts.' });
+      }
+      
+      res.json({ 
+        message: 'Discounts removed successfully!',
+        affectedProducts: results.affectedRows
+      });
+    });
+  } catch (error) {
+    console.error('Error removing discounts:', error);
+    res.status(500).json({ message: 'Server error while removing discounts.' });
+  }
+};
 
-module.exports = { getAllProducts, getProductById, addProduct, updateProduct, deleteProduct, addProductImage, getMostSoldProducts, getProductReviews, addProductReview, getRelatedProducts, getFilteredProducts};
+module.exports = { 
+  getAllProducts, 
+  getProductById, 
+  addProduct, 
+  updateProduct, 
+  deleteProduct, 
+  addProductImage, 
+  getMostSoldProducts, 
+  getProductReviews, 
+  addProductReview, 
+  getRelatedProducts, 
+  getFilteredProducts,
+  applyDiscount,
+  removeDiscounts
+};

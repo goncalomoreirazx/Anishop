@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import ProductGallery from '../components/product/ProductGallery';
 import ProductReviews from '../components/product/ProductReviews';
@@ -163,6 +163,9 @@ function ProductDetails() {
     );
   }
 
+  // Check if product has a discount
+  const hasDiscount = product.discount_percentage > 0;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {isModalVisible && <ModalItem />}
@@ -188,8 +191,20 @@ function ProductDetails() {
             ))}
           </div>
           
-          {/* Price */}
-          <div className="text-3xl font-bold text-primary mt-4">${product.price}</div>
+          {/* Price with discount badge */}
+          <div className="mt-4 flex items-center">
+            {hasDiscount ? (
+              <>
+                <div className="text-3xl font-bold text-primary">${product.final_price}</div>
+                <div className="ml-2 line-through text-gray-500">${product.price}</div>
+                <div className="ml-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                  {product.discount_percentage}% OFF
+                </div>
+              </>
+            ) : (
+              <div className="text-3xl font-bold text-primary">${product.price}</div>
+            )}
+          </div>
           
           {/* Rating */}
           <div className="mt-3 flex items-center">
