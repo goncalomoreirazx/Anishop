@@ -260,7 +260,6 @@ function ProductDetails() {
           
           {/* Related Products - Moved to here under the Add to Cart button */}
           <div className="mt-10">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Products</h3>
             <RelatedProducts productId={parseInt(id)} />
           </div>
         </div>

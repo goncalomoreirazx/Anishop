@@ -70,62 +70,6 @@ function Products() {
                 </button>
               </div>
             </div>
-
-            {/* Category tabs */}
-            <div className="bg-white rounded-t-lg shadow-md mb-6">
-              <div className="flex overflow-x-auto">
-                <button
-                  onClick={() => setActiveTab('all')}
-                  className={`px-4 py-3 font-medium text-sm flex items-center min-w-max ${
-                    activeTab === 'all'
-                      ? 'text-indigo-600 border-b-2 border-indigo-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <FaFilter className="mr-2" /> All Products
-                </button>
-                <button
-                  onClick={() => setActiveTab('manga')}
-                  className={`px-4 py-3 font-medium text-sm flex items-center min-w-max ${
-                    activeTab === 'manga'
-                      ? 'text-indigo-600 border-b-2 border-indigo-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Manga
-                </button>
-                <button
-                  onClick={() => setActiveTab('anime')}
-                  className={`px-4 py-3 font-medium text-sm flex items-center min-w-max ${
-                    activeTab === 'anime'
-                      ? 'text-indigo-600 border-b-2 border-indigo-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Anime
-                </button>
-                <button
-                  onClick={() => setActiveTab('figures')}
-                  className={`px-4 py-3 font-medium text-sm flex items-center min-w-max ${
-                    activeTab === 'figures'
-                      ? 'text-indigo-600 border-b-2 border-indigo-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Figures
-                </button>
-                <button
-                  onClick={() => setActiveTab('accessories')}
-                  className={`px-4 py-3 font-medium text-sm flex items-center min-w-max ${
-                    activeTab === 'accessories'
-                      ? 'text-indigo-600 border-b-2 border-indigo-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Accessories
-                </button>
-              </div>
-            </div>
             
             {/* Products list component */}
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg p-6 shadow-lg">
