@@ -110,11 +110,8 @@ const OrderList = ({ orders, Pagination }) => {
                                             
                                             {/* Total price */}
                                             <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    ${order.total_price.toFixed(2)}
-                                                </div>
+                                            <div className="text-sm font-medium text-gray-900">${(parseFloat(order.total_price) || 0).toFixed(2)}</div>
                                             </td>
-                                            
                                             {/* Item count */}
                                             <td className="px-4 py-4 whitespace-nowrap">
                                                 <div className="text-sm text-gray-900">

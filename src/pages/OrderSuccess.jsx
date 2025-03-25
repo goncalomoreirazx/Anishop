@@ -85,7 +85,7 @@ function OrderSuccess() {
                       </div>
                     </td>
                     <td className="py-4 px-4 text-center">{item.quantity}</td>
-                    <td className="py-4 px-4 text-right font-medium">${item.price.toFixed(2)}</td>
+                    <td className="py-4 px-4 text-right font-medium">${(parseFloat(item.price) || 0).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

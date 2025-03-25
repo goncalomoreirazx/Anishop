@@ -89,7 +89,7 @@ function RelatedProducts({ productId }) {
             {/* Product details */}
             <div className="p-4">
               <h3 className="text-gray-900 font-medium line-clamp-1">{product.name}</h3>
-              <p className="text-primary font-bold mt-2">$ {product.price.toFixed(2)}</p>
+              <p className="text-primary font-bold mt-2">$ {(parseFloat(product.price) || 0).toFixed(2)}</p>
             </div>
           </div>
         ))}

@@ -19,7 +19,7 @@ function CartItem({ item, onUpdateQuantity, onRemove }) {
       {/* Product details */}
       <div className="flex-1 ml-6">
         <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
-        <p className="text-sm text-gray-500 mt-1">${item.price.toFixed(2)}</p>
+        <p className="text-sm text-gray-500 mt-1">${(parseFloat(item.price) || 0).toFixed(2)}</p>
       </div>
 
       {/* Quantity selector and remove button */}

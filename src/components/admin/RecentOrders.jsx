@@ -80,7 +80,7 @@ function RecentOrders() {
                                         <div className="text-sm font-medium text-gray-900">{order.first_name} {order.last_name}</div>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">${order.total_price.toFixed(2)}</div>
+                                    <div className="text-sm font-medium text-gray-900">${(parseFloat(order.total_price) || 0).toFixed(2)}</div>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap">
                                         <div className="text-sm text-gray-500">

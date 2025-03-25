@@ -101,8 +101,8 @@ function BuyHistory() {
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                     Completed
                   </span>
-                  <p className="mt-1 font-semibold text-primary text-right">
-                    Total: R$ {order.total_price.toFixed(2)}
+                  <p className="font-semibold text-primary text-right">
+                    Total: R$ {(parseFloat(order.total_price) || 0).toFixed(2)}
                   </p>
                 </div>
               </div>
